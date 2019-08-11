@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.matt.chrome.acc</groupId>
-	<artifactId>Application</artifactId>
+	<artifactId>chrome-password-dumper</artifactId>
 	<name>Chrome_Password_Dumper</name>
 	<version>1.0.0</version>
 
 	<properties>
 		<jdk.version>1.8</jdk.version>
-		<sqllite.version>3.8.7</sqllite.version>
+		<sqllite.version>3.28.0</sqllite.version>
+		<jackson.version>2.9.9.3</jackson.version>
+		<lombok.version>1.18.8</lombok.version>
 		<finalName>${project.name}-${project.version}</finalName>
 		<jna.version>4.1.0</jna.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,14 +26,12 @@
 		</license>
 	</licenses>
 
-	<repositories>
-		<repository>
-			<id>sqlite-jdbc-repo</id>
-			<url>http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/</url>
-		</repository>
-	</repositories>
-
 	<dependencies>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna</artifactId>
@@ -46,6 +47,13 @@
 			<artifactId>sqlite-jdbc</artifactId>
 			<version>${sqllite.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
