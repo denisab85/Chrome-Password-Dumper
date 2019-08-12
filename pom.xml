@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.matt.chrome.acc</groupId>
 	<artifactId>chrome-password-dumper</artifactId>
-	<name>Chrome_Password_Dumper</name>
+	<name>ChromePassDump</name>
 	<version>1.0.0</version>
 
 	<properties>
@@ -82,15 +82,33 @@
 				<version>2.3</version>
 				<executions>
 					<execution>
+						<id>CLI</id>
 						<phase>package</phase>
 						<goals>
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+							<finalName>ChromePassDump</finalName>
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>me.matt.chrome.acc.Application</mainClass>
+									<mainClass>me.matt.chrome.acc.ChromePassDump</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+					<execution>
+						<id>GUI</id>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<finalName>ChromePassTool</finalName>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>me.matt.chrome.acc.gui.ChromePassTool</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>
