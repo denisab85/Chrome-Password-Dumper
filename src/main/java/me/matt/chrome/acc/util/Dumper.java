@@ -7,12 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.Getter;
 import me.matt.chrome.acc.exception.ChromeNotFoundException;
 import me.matt.chrome.acc.exception.DatabaseConnectionException;
 import me.matt.chrome.acc.exception.DatabaseReadException;
@@ -24,83 +24,92 @@ import me.matt.chrome.acc.wrappers.LocalState;
 
 public class Dumper {
 
-	public static Dumper dumpAccounts()
+	@Getter
+	private final Map<String, ChromeProfile> profiles;
+	private final Path chromeInstall;
+	private final OperatingSystem os = OperatingSystem.getOperatingsystem();
+
+	@Getter
+	private File dumpLocation;
+
+	public Dumper()
 			throws DatabaseConnectionException, DatabaseReadException, IOException, UnsupportedOperatingSystemException, InstantiationException {
 		final OperatingSystem os = OperatingSystem.getOperatingsystem();
 		if (os == OperatingSystem.UNKNOWN) {
 			throw new UnsupportedOperatingSystemException(System.getProperty("os.name") + " is not supported by this application!");
 		}
-		final Path chromeInstall = Paths.get(os.getChromePath());
 
-		final File chromeInfo = new File(chromeInstall.toString(), "Local State");
+		chromeInstall = Paths.get(os.getChromePath());
 
 		if (Files.notExists(chromeInstall)) {
 			throw new ChromeNotFoundException("Google chrome installation not found.");
 		}
 
-		Map<String, ChromeProfile> profiles;
+		final File chromeInfo = new File(chromeInstall.toFile(), "Local State");
+
 		ObjectMapper mapper = new ObjectMapper();
 		LocalState localState = mapper.readValue(chromeInfo, LocalState.class);
 		profiles = localState.getProfile().getInfo_cache();
 
-		final String pathToSave = OperatingSystem.getOperatingsystem().getSavePath();
-		final HashMap<File, ChromeAccount[]> accounts = new HashMap<File, ChromeAccount[]>();
-		for (final Map.Entry<String, ChromeProfile> profile : profiles.entrySet()) {
-			final File loginData = new File(chromeInstall.toString() + File.separator + profile.getKey(), "Login Data");
-			accounts.put(new File(pathToSave, "Accounts - " + profile.getValue().getName() + ".txt"), Dumper.readDatabase(loginData));
-		}
-		if (profiles.size() < 1 || accounts.isEmpty()) {
+		if (profiles.isEmpty()) {
 			throw new InstantiationException("No chrome profiles found!");
 		}
-		return new Dumper(accounts);
+
 	}
 
-	private static ChromeAccount[] readDatabase(final File data)
+	public ArrayList<ChromeAccount> readDatabase(String profileName)
 			throws DatabaseConnectionException, DatabaseReadException, UnsupportedOperatingSystemException {
+		final File data = new File(chromeInstall.toString() + File.separator + profileName, "Login Data");
 		final ChromeDatabase db = ChromeDatabase.connect(data);
 		final ArrayList<ChromeAccount> accounts = db.selectAccounts();
 		db.close();
-		return accounts.toArray(new ChromeAccount[] {});
+		return accounts;
 	}
 
-	private final Map<File, ChromeAccount[]> profiles;
-
-	private Dumper(final Map<File, ChromeAccount[]> profiles) {
-		this.profiles = profiles;
+	public int saveAllToDefaultFolder() throws DatabaseConnectionException, DatabaseReadException, IOException, UnsupportedOperatingSystemException {
+		return saveAllToFolder(null);
 	}
 
-	public int getAmountOfProfiles() {
-		return profiles.keySet().size();
+	public static String getFileNameForProfile(String profileName) {
+		return "Accounts - " + profileName + ".txt";
 	}
 
-	public String getDumpLocation() {
-		return profiles.keySet().iterator().next().getParent();
-	}
+	public int saveAllToFolder(File dumpLocation)
+			throws IOException, DatabaseConnectionException, DatabaseReadException, UnsupportedOperatingSystemException {
+		int totalPasswords = 0;
 
-	public int getDumpSize() {
-		return profiles.values().stream().mapToInt(b -> b.length).sum();
-	}
-
-	public boolean saveToFile() throws IOException {
-		for (final File file : profiles.keySet()) {
-			if (file.exists()) {
-				file.delete();
-			}
-			file.getParentFile().mkdirs();
-			file.createNewFile();
-			final ChromeAccount[] accounts = profiles.get(file);
-			if (accounts.length > 0) {
-				final List<String> lines = new ArrayList<>();
-				for (final ChromeAccount account : accounts) {
-					lines.add("URL: " + account.getURL());
-					lines.add("Username: " + account.getUsername());
-					lines.add("Password: " + account.getPassword());
-					lines.add("");
-				}
-				lines.remove(lines.size() - 1);
-				Files.write(file.toPath(), lines, StandardCharsets.UTF_8);
-			}
+		if (dumpLocation == null) {
+			dumpLocation = new File(os.getSavePath());
 		}
-		return true;
+
+		for (final Map.Entry<String, ChromeProfile> profile : profiles.entrySet()) {
+			File targetFile = new File(dumpLocation, getFileNameForProfile(profile.getValue().getUser_name()));
+			totalPasswords += saveToFile(profile.getKey(), targetFile);
+		}
+		return totalPasswords;
+	}
+
+	public int saveToFile(String profileName, File targetFile)
+			throws DatabaseConnectionException, DatabaseReadException, UnsupportedOperatingSystemException, IOException {
+		if (targetFile.exists()) {
+			targetFile.delete();
+		}
+		targetFile.getParentFile().mkdirs();
+		targetFile.createNewFile();
+
+		final ArrayList<ChromeAccount> accounts = readDatabase(profileName);
+		if (accounts.size() > 0) {
+			final List<String> lines = new ArrayList<>();
+			for (final ChromeAccount account : accounts) {
+				lines.add("URL: " + account.getURL());
+				lines.add("Username: " + account.getUsername());
+				lines.add("Password: " + account.getPassword());
+				lines.add("");
+			}
+			lines.remove(lines.size() - 1);
+			Files.write(targetFile.toPath(), lines, StandardCharsets.UTF_8);
+		}
+		return accounts.size();
+
 	}
 }
