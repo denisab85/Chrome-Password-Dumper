@@ -17,7 +17,7 @@ import me.matt.chrome.acc.exception.ChromeNotFoundException;
 import me.matt.chrome.acc.exception.DatabaseConnectionException;
 import me.matt.chrome.acc.exception.DatabaseReadException;
 import me.matt.chrome.acc.exception.UnsupportedOperatingSystemException;
-import me.matt.chrome.acc.wrappers.ChromeAccount;
+import me.matt.chrome.acc.wrappers.ChromeLogin;
 import me.matt.chrome.acc.wrappers.ChromeDatabase;
 import me.matt.chrome.acc.wrappers.ChromeProfile;
 import me.matt.chrome.acc.wrappers.LocalState;
@@ -57,12 +57,13 @@ public class Dumper {
 
 	}
 
-	public ArrayList<ChromeAccount> readDatabase(String profileName)
+	public List<ChromeLogin> readDatabase(String profileName)
 			throws DatabaseConnectionException, DatabaseReadException, UnsupportedOperatingSystemException {
 		final File data = new File(chromeInstall.toString() + File.separator + profileName, "Login Data");
-		final ChromeDatabase db = ChromeDatabase.connect(data);
-		final ArrayList<ChromeAccount> accounts = db.selectAccounts();
-		db.close();
+		final ChromeDatabase db = ChromeDatabase.getInstance();
+		db.connect(data);
+		final List<ChromeLogin> accounts = db.selectAccounts();
+//		db.close();
 		return accounts;
 	}
 
@@ -97,13 +98,13 @@ public class Dumper {
 		targetFile.getParentFile().mkdirs();
 		targetFile.createNewFile();
 
-		final ArrayList<ChromeAccount> accounts = readDatabase(profileName);
+		final List<ChromeLogin> accounts = readDatabase(profileName);
 		if (accounts.size() > 0) {
 			final List<String> lines = new ArrayList<>();
-			for (final ChromeAccount account : accounts) {
-				lines.add("URL: " + account.getURL());
-				lines.add("Username: " + account.getUsername());
-				lines.add("Password: " + account.getPassword());
+			for (final ChromeLogin account : accounts) {
+				lines.add("URL: " + account.getActionUrl());
+				lines.add("Username: " + account.getUsernameValue());
+				lines.add("Password: " + account.getDecryptedPassword());
 				lines.add("");
 			}
 			lines.remove(lines.size() - 1);

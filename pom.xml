@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
@@ -14,6 +13,7 @@
 		<sqllite.version>3.28.0</sqllite.version>
 		<jackson.version>2.9.9.3</jackson.version>
 		<lombok.version>1.18.8</lombok.version>
+		<hibernate.version>5.4.4.Final</hibernate.version>
 		<finalName>${project.name}-${project.version}</finalName>
 		<jna.version>4.1.0</jna.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,6 +25,13 @@
 			<url>http://www.opensource.org/licenses/mit-license</url>
 		</license>
 	</licenses>
+
+	<repositories>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -53,7 +60,16 @@
 			<version>${lombok.version}</version>
 			<scope>provided</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.gwenn</groupId>
+			<artifactId>sqlite-dialect</artifactId>
+			<version>master</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -90,8 +106,7 @@
 						<configuration>
 							<finalName>ChromePassDump</finalName>
 							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>me.matt.chrome.acc.ChromePassDump</mainClass>
 								</transformer>
 							</transformers>
@@ -106,8 +121,7 @@
 						<configuration>
 							<finalName>ChromePassTool</finalName>
 							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>me.matt.chrome.acc.gui.ChromePassTool</mainClass>
 								</transformer>
 							</transformers>

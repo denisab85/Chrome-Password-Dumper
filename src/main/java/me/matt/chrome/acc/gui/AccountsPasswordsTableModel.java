@@ -1,12 +1,9 @@
 package me.matt.chrome.acc.gui;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.swing.table.AbstractTableModel;
-
-import me.matt.chrome.acc.wrappers.ChromeAccount;
+import me.matt.chrome.acc.wrappers.ChromeLogin;
 
 public class AccountsPasswordsTableModel extends AbstractTableModel {
 	/**
@@ -14,19 +11,19 @@ public class AccountsPasswordsTableModel extends AbstractTableModel {
 	 */
 	private static final long serialVersionUID = -2532787061932398344L;
 
-	private List<ChromeAccount> accounts;
-	private List<ChromeAccount> displayedAccounts;
+	private List<ChromeLogin> accounts;
+	private List<ChromeLogin> displayedAccounts;
 
 	private enum columnNames {
 		Username, Password, URL
 	}
 
-	public void setAccounts(ArrayList<ChromeAccount> accounts) {
+	public void setAccounts(List<ChromeLogin> accounts) {
 		this.accounts = accounts;
 		this.displayedAccounts = accounts;
 	}
 
-	public List<ChromeAccount> getAccounts() {
+	public List<ChromeLogin> getAccounts() {
 		return displayedAccounts;
 	}
 
@@ -50,15 +47,15 @@ public class AccountsPasswordsTableModel extends AbstractTableModel {
 		if (displayedAccounts == null) {
 			return null;
 		}
-		ChromeAccount account = displayedAccounts.get(rowIndex);
+		ChromeLogin account = displayedAccounts.get(rowIndex);
 
 		switch (columnNames.values()[columnIndex]) {
 		case Username:
-			return account.getUsername();
+			return account.getUsernameValue();
 		case Password:
-			return account.getPassword();
+			return account.getDecryptedPassword();
 		case URL:
-			return account.getURL();
+			return account.getActionUrl();
 		default:
 			break;
 		}
@@ -67,14 +64,13 @@ public class AccountsPasswordsTableModel extends AbstractTableModel {
 
 	public void filter(String text, boolean caseSensitive) {
 		if (caseSensitive) {
-			displayedAccounts = accounts.stream().filter(
-					account -> account.getUsername().contains(text) || account.getPassword().contains(text) || account.getURL().contains(text))
-					.collect(Collectors.toList());
+			displayedAccounts = accounts.stream().filter(account -> account.getUsernameValue().contains(text)
+					|| account.getDecryptedPassword().contains(text) || account.getActionUrl().contains(text)).collect(Collectors.toList());
 		} else {
 			displayedAccounts = accounts.stream()
-					.filter(account -> account.getUsername().toLowerCase().contains(text.toLowerCase())
-							|| account.getPassword().toLowerCase().contains(text.toLowerCase())
-							|| account.getURL().toLowerCase().contains(text.toLowerCase()))
+					.filter(account -> account.getUsernameValue().toLowerCase().contains(text.toLowerCase())
+							|| account.getDecryptedPassword().toLowerCase().contains(text.toLowerCase())
+							|| account.getActionUrl().toLowerCase().contains(text.toLowerCase()))
 					.collect(Collectors.toList());
 		}
 	}
